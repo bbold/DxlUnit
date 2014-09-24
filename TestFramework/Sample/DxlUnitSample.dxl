@@ -1,0 +1,149 @@
+﻿/**Sample of test capabilities of the DxlUnit framework. 
+\file DxlUnitSample.dxl
+\author Bernhard Bold
+\date 08.12.2010
+  
+\version 1.0
+ 
+\history
+ 08.12.2010 Created.<br>
+---------------------------------------------------------------
+Copyright (c) 2014, Bernhard Bold
+All rights reserved.
+
+The software is licensed under the conditions of the BSD Simplified.
+For details see the license.txt file.
+***************************************************************/
+
+///Current file needed for the framework.
+#include <TestFramework/Workspace.inc>
+const string this = BASE_PATH "TestFramework/Sample/DxlUnitSample.dxl";
+
+/* Tests for Version 2.0 */
+#include <TestFramework/DxlUnit.inc>
+#include <TestFramework/DxlUnitRunner.inc>
+
+void Setup(){
+	
+}//Setup
+
+void Teardown(){
+	
+}//Teardown
+
+//string tests
+void StringTest(){
+	string s1, s2;
+	s1 = "a";
+	s2 = "";
+	
+	//test with 2 parameters
+	s1 = "a";
+	//Assert(actual, that(), summary)
+	Assert(s1, Equals, "a", "StringEqualsTest1"); 
+	
+	Assert(s1, StartsWith, "a", "StringStartsWithTest1"); 
+	Assert(s1, EndsWith, "a", "StringEndsWithTest1"); 
+	
+	//with null string
+	Assert(s2, Equals, "", "StringEqualsTest2"); 
+	Assert(s2, StartsWith, "", "StringStartsWithTest2"); 
+	Assert(s2, EndsWith, "", "StringEndsWithTest2"); 
+	
+	//with longer string
+	s1 = "annabolika";
+	Assert(s1, Equals, "annabolika", "StringEqualsTest3"); 
+	Assert(s1, StartsWith, "anna", "StringStartsWithTest3"); 
+	Assert(s1, EndsWith, "bolika", "StringEndsWithTest3"); 
+	
+	//ERRORS: search string longer than string to search in
+	s1 = "short";
+	Assert(s1, Equals, "", "Expected: StringEqualsError");
+	Assert(s1, StartsWith, "shorter", "Expected: StringStartsWithError"); 
+	Assert(s1, EndsWith, "not short", "Expected: StringEndsWithError"); 
+	 
+	//with null string
+	
+	//case sensitivity
+	
+	//test with 1 parameter
+	Assert(s1, IsNotNull, "StringNotNullTest1");
+	Assert(s2, IsNull, "StringNullTest1");
+	//the shorter forms
+	Assert(s1, IsNotNull);
+	Assert(s2, IsNull);
+	
+}//StringTest
+
+void IntTest(){
+	int i1 = 0;
+	int i2 = 1;
+	
+	//Compare
+	Assert(i1, Equals, 0, "IntTestCompare");
+	
+	//Greater
+	
+	//Less
+	
+	//Error
+	Assert(i1, Equals, 0, "IntTestCompareError");
+	
+}//IntTest
+
+void BoolTest(){
+	bool wahr = true;
+	bool unwahr = false;
+	
+	//valid tests
+	Assert(wahr, IsTrue);
+	Assert(unwahr, IsFalse);
+	
+	//invalid tests
+	Assert(unwahr, IsTrue);
+	Assert(wahr, IsFalse);
+	
+	//test equality of 2 values
+	Assert(wahr, Equals, true);
+	Assert(wahr, Equals, false);
+}//BoolTest
+
+void RealTest(){
+	//missing tests don't deliver an error!
+	WriteInfo("Todo: Write tests for method Real in RealTest()");
+	
+}//RealTest 
+
+/* 
+This is a method from you productive script and just located here
+for demonstration and testpurposes.
+*/
+int Add(int sum, int amount){
+    //error in our add method
+    return sum + amount;
+}//Add
+
+void AddTest(){
+    //arrange
+    int sum = 0;
+    //act
+    sum = Add(100, 10);
+    //assert
+    Assert(sum, Equals, 110);
+    
+}//AddTest
+
+/** Call the test runner. **/
+//in DxlEditor: 
+//RunConsole(this);
+//with log and debug information 
+//RunConsole(this, this ".log", true);
+//with debug information
+//RunConsole(this, true);
+//with log
+//RunConsole(this, this ".log");
+
+//start with user interface: 
+RunGui(this);
+//with debug information
+// RunGui(this, true);

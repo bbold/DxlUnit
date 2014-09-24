@@ -1,0 +1,36 @@
+﻿//<
+/** GUI runner for test files.
+\file DxlUnitGui.dxl
+\author Bernhard Bold
+\date 23.11.2010
+  
+\version 2.8
+
+\copyright (c) Bernhard Bold
+
+\dependencies <br>
+DxlUnitBL.inc - the business layer.<br>
+DxlUnitGui.inc - the UI to show (eventualy).<br>
+
+\history
+ 23.11.2010 Created. <br>
+---------------------------------------------------------------
+Copyright (c) 2014, Bernhard Bold
+All rights reserved.
+
+The software is licensed under the conditions of the BSD Simplified.
+For details see the license.txt file.
+***************************************************************/
+
+/// \cond 
+pragma encoding, "UTF-8"
+/// \endcond
+
+//common methods
+#include <TestFramework/DxlUnitBL.inc>
+//the real code for the GUI
+#include <TestFramework/DxlUnitGui.inc>
+
+/*--- main --*/
+//open GUI with empty file
+ShowGui(null, false);

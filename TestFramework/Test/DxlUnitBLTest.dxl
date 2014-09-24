@@ -1,0 +1,505 @@
+﻿// 
+/** Test the business layer of the unit framework.
+\file DxlUnitBLTest.dxl
+\author Bernhard Bold
+\date 21.06.2011
+  
+\version 1.1
+
+\dependencies <br>
+
+
+\remarks To test Setup/Teardown or RunGui/RunConsole, or either
+test methods, we have to write it to a test file not as one string,
+since then it would be mis-interpreted or removed from this file, 
+before it will be called in the test runner. See GetTestMethods()
+for a sample.
+
+\history <br>
+ 21.06.2011 Created. <br>
+---------------------------------------------------------------
+Copyright (c) 2014, Bernhard Bold
+All rights reserved.
+
+The software is licensed under the conditions of the BSD Simplified.
+For details see the license.txt file.
+***************************************************************/
+/// \cond
+pragma encoding, "UTF-8"
+/// \endcond
+
+#include <TestFramework/Workspace.inc>
+const string this = BASE_PATH "TestFramework/Test/DxlUnitBLTest.dxl";
+
+//references to include
+#include <TestFramework/DxlUnit.inc>
+#include <TestFramework/DxlUnitRunner.inc>
+
+//and here NOT to the UUT
+//the UUT is already referenced by the DxlUnitRunner
+
+/*----- constants -------*/
+//keywords for test results delivered for each test
+const string csTestMethod       = "@Tested Method";
+const string csAssertions       = "@Count Assertions";
+const string csValidAssertions  = "@Valid Assertions";
+const string csResult           = "@Test Errors";
+const string csOtherErrors      = "@Other Errors";
+const string csInfos            = "@Infos"; 
+    
+
+/*----- helper functions -------*/
+/**************************************************************/
+/** Delivers a test result, as is delivered by a test run.
+
+\returns The test reusult in a buffer.
+
+\remarks 
+***************************************************************/
+Buffer TestResult(){
+    Buffer bufResult = create();
+    //a typical test result delivered for a test
+    bufResult += "@Tested Method\n";
+    bufResult += "BoolTest\n";
+    bufResult += "@Count Assertions\n";
+    bufResult += "6\n";
+    bufResult += "@Valid Assertions\n";
+    bufResult += "3\n";
+    bufResult += "@Test Errors\n";
+    bufResult += "<Line:99> IsTrue expected \"true\" but was \"false\"\n";
+    bufResult += "<Line:100> IsFalse expected \"false\" but was \"true\"\n";
+//    bufResult += "<Line:104> Equals expected \"false\" but was \"true\"\n";
+    bufResult += "\n";
+    bufResult += "@Other Errors\n";
+    bufResult += "\n";
+    bufResult += "@Infos\n";
+    bufResult += "\n";
+    
+    return bufResult;
+}//TestResult
+/**************************************************************/
+/** Delivers a test result, as is delivered by a test run.
+
+\returns The test result as string.
+
+\remarks 
+***************************************************************/
+string TestResult(){
+    string result = "";
+    Buffer bufResult = TestResult();
+
+    result = stringOf(bufResult);
+    delete(bufResult);
+    
+    return result;
+    
+}//TestResult
+/*----- setup and teardown -------*/
+void FixtureSetup(){
+//	WriteInfo("Info from FixtureSetup");
+}
+void FixtureTeardown(){
+//	WriteInfo("Info from FixtureTeardown");
+}
+
+void Setup(){
+//	WriteInfo("Info from Setup");
+}
+void Teardown(){
+//	WriteInfo("Info from Teardown");
+}
+
+/*----- tests ------------------*/
+/**************************************************************/
+/** Test runtime error
+***************************************************************/
+void RuntimeErrorTest(){
+    Module mod = null;
+    ///\test Given an error in a test method
+    ///      When I run the test
+    ///      Then the error shall be catched
+    ///      And given out by the test framework
+    
+    //create a run-time error
+    string err = name(mod);
+    string rtError = lastError();
+    Assert(rtError, EndsWith, " null Module parameter was passed into argument position 1\n");
+   
+    //clear run time error
+    noError();  
+}//RuntimeErrorTest
+/**************************************************************/
+/** Test if a text line can be a method.
+
+\remarks Incorrect syntax is not tested. We only check for the
+existence of return type method name and parameter braces. 
+***************************************************************/
+void FindMethodStartTest(){
+	Buffer lne = create();
+	bool result = false;
+	
+	///Given an empty line 
+	///When I check for the start of method
+	///Then I get a false value
+	result = IsMethodStart(lne);
+	Assert(result, IsFalse);
+	
+	///Given a string which hasn't braces
+	///When I check for the start of method
+	///Then I get a false value
+	lne = "void NoFunc{";
+	result = IsMethodStart(lne);
+	Assert(result, IsFalse);
+
+	///Given a method with return type
+	///When I check for the start of method
+	///Then I get a true value
+	lne = "bool WithReturnType()";
+	result = IsMethodStart(lne);
+	Assert(result, IsTrue);
+	//line may end with curled brace or not
+	lne = "bool WithReturnType(){";
+	result = IsMethodStart(lne);
+	Assert(result, IsTrue);
+	//line may have a self made return type
+	lne = "MyOwn WithReturnType(){";
+	result = IsMethodStart(lne);
+	Assert(result, IsTrue);
+	
+	///Given a method with parameters
+	///When I check for the start of method
+	///Then I get a true value
+	lne = " void NoFunc( string a, xy p ){ ";
+	result = IsMethodStart(lne);
+	Assert(result, IsTrue);
+
+	delete(lne);
+}//FindMethodStartTest
+
+/**************************************************************/
+/** Look for extraction of special methods like Setup in a code 
+line. 
+***************************************************************/
+void HasSpecialMethodTest(){
+	bool result = false;
+	Buffer lne = create();
+	
+	///\test Given an empty code line
+	///      When I look for a special method
+	///      Then I get false
+	Assert(HasSpecialMethod(lne, "Setup"), IsFalse);
+	
+	///\test Given a special method having a return type
+	///      When I search for the special method
+	///      Then I get false
+	lne = "bool Setup(){";
+	Assert(HasSpecialMethod(lne, "Setup"), IsFalse);
+	
+	///\test Given a special method having a parameter
+	///      When I search for the specuial method
+	///      Then I get false
+	lne = "void Setup(string param){";
+	Assert(HasSpecialMethod(lne, "Setup"), IsFalse);
+	
+	///\test Given a similar method with no parameter and return type void
+	///      When I search for the special method
+	///      Then I get false
+	lne = "void DummySetup(){";
+	Assert(HasSpecialMethod(lne, "Setup"), IsFalse);
+	
+	///\test Given a special method with no parameter and return type void
+	///      When I search for the special method
+	///      Then I get true
+	lne = "void Setup(){";
+	Assert(HasSpecialMethod(lne, "Setup"), IsTrue);
+
+	//test FixtureTeardown
+	lne = "void FixtureTeardown( ) {";
+	Assert(HasSpecialMethod(lne, "FixtureTeardown"), IsTrue);
+	
+}//HasSpecialMethodTest
+/**************************************************************/
+/** Test parsing for test methods.
+***************************************************************/
+void GetTestMethodsTest(){
+	Buffer code = null;
+	//create a test file
+	Stream out = null;
+	//get new file name
+	string fileInput = tempFileName();
+	Skip skpResults = null;
+	Skip skpTmp = null;
+	Skip skpMethods = null;
+	Skip skpMetaData = null;
+	DxlObject method = null;
+	DxlObject metaData = null;
+	string val = "";
+	bool bVal = false;
+	int iVal = -1;
+	int count = 0;
+	
+	///\test Given an empty file
+	///      When I search for test methods
+	///      Then I get none and no meta data
+	skpResults = GetTestMethods(fileInput, code);
+	//the resulting list may not be empty
+	Assert(null(skpResults), IsFalse);
+	//get meta data
+	find(skpResults, duMetaData, skpTmp);
+	//the list with the meta information may not be empty
+	Assert(null(skpTmp), IsFalse);
+	//the object holding the metadata may not be empty
+	Assert(find(skpTmp, duMetaData, metaData), IsTrue);
+	//the DxlObject is not null
+	Assert(null(metaData), IsFalse);
+	//..but has no value
+	val = (string metaData->duCallToThis);
+	Assert(val, Equals, "");
+	
+	//methods are not empty
+	find(skpResults,duMethods, skpMethods);
+	Assert(null(skpMethods), IsFalse);
+	count = 0;
+	for method in skpMethods do{
+		count++;
+	}
+	Assert(count, Equals, 0);
+	
+	///\test Given a file with test methods
+	///      When I search for them
+	///      Then I get them 
+	///		 AND the meta data
+	
+	//hint: see remarks above before changing
+	out = write(fileInput);
+	out << "//CommentTest\n";
+	out << "void Set";
+	out << "up(){\n";
+	out << "}\n;";
+	out << "bool boolTest(){\n";
+	out << "Assert(not good);\n";
+	out << "}\n";
+	out << "//a test method\n";
+	out << "void ";
+	out << "FirstTest(){\n";
+	out << "\tAssert(1);\n";
+	out << "//\n";
+	out << "}\n";
+	out << "\n";
+	out << "void ";
+	out << "SecondTest(){\n";
+	out << "  Assert(Second1);\n";
+	out << "Assert(Second 2);\n";
+	out << "\n";
+	out << "\t\tAssert(Second3);\n";
+	out << "}\n";
+	out << "\n";
+	out << "\n";
+	out << "void ";
+	out << "ThirdTest(){\n";
+	out << "//with no Assert;\n";
+	out << "}\n";
+	out << "\n";
+	out << "\n";
+	out << "Run";
+	out << "Gui(this);\n";
+	
+	flush(out);
+	close(out);
+	skpResults = GetTestMethods(fileInput, code);
+
+	//code may not be null, but without 'RunGui' line
+	Assert(null(code), IsFalse);
+	
+	//extract meta data
+	//get meta data
+	find(skpResults, duMetaData, skpTmp);
+	//the list with the meta information may not be empty
+	Assert(null(skpTmp), IsFalse);
+	//the object holding the metadata may not be empty
+	Assert(find(skpTmp, duMetaData, metaData), IsTrue);
+	//the DxlObject is not null
+	Assert(null(metaData), IsFalse);
+	//line no were call to runner resides
+	iVal = (int metaData->duCallToThis);
+	Assert(iVal, Equals, 26);
+	//has a setup, but no teardown method
+	bVal = (bool metaData->duMethodSetup);
+	Assert(bVal, IsTrue);
+	bVal = (bool metaData->duMethodTeardown);
+	Assert(bVal, IsFalse);
+	
+	//methods are not empty
+	find(skpResults,duMethods, skpMethods);
+	Assert(null(skpMethods), IsFalse);
+	count = 0;
+	for method in skpMethods do{
+		//get number of methods to compare 
+		count++;
+		//get assertions inside test methods
+		iVal = (int method->duCountAssertions);
+		//depending on test method, we have different assertions
+		val = (string method->duMethod);
+
+		if(val == "FirstTest"){
+			Assert(iVal, Equals, 1);
+		}else if(val == "SecondTest"){
+			Assert(iVal, Equals, 3);
+		}else if(val == "ThirdTest"){
+			Assert(iVal, Equals, 0);
+//		}else{
+//			WriteInfo("Found methodname: '" val "'[" iVal "]");
+		}
+	}
+	//we have three correct defined test methods
+	Assert(count, Equals, 3);
+	
+	//clean up
+	if(!null(code)){delete(code)};
+	if(!null(metaData)){delete(metaData)};
+	if(!null(method)){delete(method)};
+	if(!null(skpMetaData)){delete(skpMetaData)};
+	if(!null(skpMethods)){delete(skpMethods)};
+	if(!null(skpTmp)){delete(skpTmp)};
+	if(!null(skpResults)){delete(skpResults)};
+}//GetTestMethodsTest
+/**************************************************************/
+/** Test if a line of code is an assertion.
+***************************************************************/
+void IsAssertionTest(){
+	Buffer buf = create();
+	
+	///\test Given an empty line
+	///      When I test for an assertion
+	///      Then I get a false value
+	Assert(IsAssertion(buf), IsFalse);
+	
+	///\test Given an assertion commented out
+	///      When I test for it
+	///      Then I get false
+	buf = "//Assert(xyz)";
+	Assert(IsAssertion(buf), IsFalse);
+	buf = "/*Assert(abc)";
+	Assert(IsAssertion(buf), IsFalse);
+	
+	///\test Given an assertion
+	///      When I test for it
+	///      Then I get true
+	buf = "Assert(all1)";
+	Assert(IsAssertion(buf), IsTrue);
+	//with whitspaces
+	buf = "  Assert(all2)";
+	Assert(IsAssertion(buf), IsTrue);
+	buf = "\tAssert(all3)";
+	Assert(IsAssertion(buf), IsTrue);
+	
+	delete(buf);
+}//IsAssertionTest
+/**************************************************************/
+/** Test Splitting results to give back.
+***************************************************************/
+void SplitResultsTest(){
+    Buffer result = create();
+    string testedMethod, testResults, otherErrors, infos;
+    int noAssertions, noValidAssertions;
+    
+    ///\test Given no result
+    ///      When I call the result function
+    ///      Then I get an error about missing result sections
+    setempty(result);
+    testedMethod = "";
+    testResults = "";
+    otherErrors= "";
+    infos = "";
+    noAssertions= 0;
+    noValidAssertions = 0;
+    //call UUT and check assertions
+    SplitResults(tempStringOf(result), testedMethod, noAssertions, noValidAssertions, testResults, otherErrors, infos);
+    Assert(testedMethod, Equals, "");
+    Assert(noAssertions, Equals, 0);
+    Assert(noValidAssertions, Equals, 0);
+    Assert(testResults, Equals, "");
+    Assert(otherErrors, StartsWith, "One of the section tags is missing");
+    Assert(infos, Equals, "");
+
+    ///\test Given only part of the results from the test framework
+    ///      When I try to split it
+    ///      Then I get an error about missing sections
+    result =  "@Tested Method";
+    result += "\nMyFunnyTest";
+    testedMethod = "";
+    testResults = "";
+    otherErrors= "";
+    infos = "";
+    noAssertions= 0;
+    noValidAssertions = 0;
+    //call UUT and check assertions
+    SplitResults(tempStringOf(result), testedMethod, noAssertions, noValidAssertions, testResults, otherErrors, infos);
+    Assert(testedMethod, Equals, "");
+    Assert(noAssertions, Equals, 0);
+    Assert(noValidAssertions, Equals, 0);
+    Assert(testResults, Equals, "");
+    Assert(otherErrors, StartsWith, "One of the section tags is missing");
+    Assert(infos, Equals, "");
+    
+    ///\test Given a result with all sections
+    ///      When I split the results
+    ///      Then I get all values correctly
+    result = TestResult();
+    testedMethod = "";
+    testResults = "";
+    otherErrors= "";
+    infos = "";
+    noAssertions= 0;
+    noValidAssertions = 0;
+
+    //call UUT and check assertions
+    SplitResults(tempStringOf(result), testedMethod, noAssertions, noValidAssertions, testResults, otherErrors, infos);
+    Assert(testedMethod, Equals, "BoolTest");
+    Assert(noAssertions, Equals, 6);
+    Assert(noValidAssertions, Equals, 3);
+    Assert(testResults, Equals, "<Line:99> IsTrue expected \"true\" but was \"false\"\n<Line:100> IsFalse expected \"false\" but was \"true\"\n");
+    Assert(otherErrors, Equals, "");
+    Assert(infos, Equals, "\n");
+    
+    delete(result);
+}//SplitResultsTest
+/**************************************************************/
+/** Test result splitting delivered from framework.
+***************************************************************/
+void GetFormatedTestResultTest(){
+    string method = "";
+    string summary = "";
+    string result = "";
+    Buffer bufResult = create();
+    Buffer formatedResult = create();
+    
+    ///\test Given a failed test result
+    ///      When I format them for output
+    ///      Then I get failed as test result
+    ///      And the test method with contianing assertions 
+    ///      And how many have been succesful
+    ///      And detailed errors with the line where they occured
+
+    //get a fake test result
+    summary = TestResult();
+    //define the method we want the result for 
+    method = "BoolTest";
+
+    formatedResult = GetFormatedTestResult(method, summary, result);
+
+    //the test result is failed
+    Assert(result, Equals, "failed");
+    //the formated result contains method, assertions and successful assertions
+    Assert(tempStringOf(formatedResult), StartsWith, "* BoolTest[6/3]");
+    //the formated result contains the line numbers and differences
+    Assert(tempStringOf(formatedResult), Contains, "<Line:99> IsTrue expected \"true\" but was \"false\"");
+    Assert(tempStringOf(formatedResult), Contains, "<Line:100> IsFalse expected \"false\" but was \"true\"");
+    
+    delete(formatedResult);
+    delete(bufResult);
+}//GetFormatedTestResultTest
+/*--- call test runner ---*/
+// RunConsole(this);
+// 
+RunGui(this);
