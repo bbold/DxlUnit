@@ -1,7 +1,7 @@
 # DxlUnit
 The Test Framework for IBM Doors script language DXL
 
-![](https://github.com/bbold/DxlUnit/tree/master/TestFramework/doc/doxygen/images/DxlUnitGuiResults.jpg)
+![](https://github.com/bbold/DxlUnit/blob/master/TestFramework/doc/doxygen/images/DxlUnitGuiResults.jpg)
 
 Comming from object oriented languages, the most I missed in 2010 on DXL was a test framework like JUnit or NUnit.
 
@@ -12,17 +12,17 @@ For those who are not familiar with test frameworks and to get an overview of th
 To get a deeper understanding you will also find a HTML help file explaining in more detail the concepts of a test framework and the realisation and usage inside the DxlUnit Testframwork.
 
 **Features:**
-- run single or all tests in an own GUI:
-- 
-    ![](https://github.com/bbold/DxlUnit/tree/master/TestFramework/doc/doxygen/images/DxlUnitGuiResultSingle.jpg)
+- Run single or all tests in an own GUI:
+ 
+![](https://github.com/bbold/DxlUnit/blob/master/TestFramework/doc/doxygen/images/DxlUnitGuiResultSingle.jpg)
 
-- run all tests inside IBM Doors DXL Interaction
-- 
-    ![](https://github.com/bbold/DxlUnit/tree/master/TestFramework/doc/doxygen/images/DxlInteraction.jpg)
+- Run all tests inside IBM Doors DXL Interaction
+ 
+![](https://github.com/bbold/DxlUnit/blob/master/TestFramework/doc/doxygen/images/DxlInteraction.jpg)
 
-- run tests inside DxlEditor
-- 
-    ![](https://github.com/bbold/DxlUnit/tree/master/TestFramework/doc/doxygen/images/DXLEditorConsole.jpg)
+- Run tests inside DxlEditor
+ 
+![](https://github.com/bbold/DxlUnit/blob/master/TestFramework/doc/doxygen/images/DXLEditorConsole.jpg)
 
 **Planned:**
 - implement keyword to ignore tests if running without users interface
