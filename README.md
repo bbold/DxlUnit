@@ -1,5 +1,6 @@
-# DxlUnit
-The Test Framework for IBM Doors script language DXL
+# DxlUnit - The Test Framework for IBM Rational DOORS script language DXL
+
+Here it is:
 
 ![](https://github.com/bbold/DxlUnit/blob/master/TestFramework/doc/doxygen/images/DxlUnitGuiResults.jpg)
 
